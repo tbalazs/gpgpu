@@ -126,7 +126,7 @@ void Shader::enable(){
 }
 
 void Shader::disable(){
-  glUseProgram(NULL);
+  glUseProgram(0);
 }
 
 void Shader::bindUniformInt(const char* name, int i){
@@ -164,5 +164,26 @@ void Shader::bindUniformTexture(const char* name, GLuint texture, GLuint unit){
 void Shader::bindAttribLocation(GLuint id, const char* name){
   glEnableVertexAttribArray(id);
   glBindAttribLocation(shaderProgram, id, name);
+}
+
+void Shader::bindUniformMatrix(const char* name, float* m, unsigned int arraySize){
+  GLuint location = glGetUniformLocation(shaderProgram, name);
+  glUniformMatrix4fv(location, arraySize, false, m);
+}
+
+void Shader::bindUniformVector(const char* name, float* m, unsigned int arraySize){
+  GLuint location = glGetUniformLocation(shaderProgram, name);
+  glUniform3fv(location, arraySize, m);
+}
+
+void Shader::bindUniformFloat4Array(const char* name, float* m, unsigned int arraySize){
+  GLuint location = glGetUniformLocation(shaderProgram, name);
+  glUniform4fv(location, arraySize, m);
+}
+
+void Shader::bindUniformIntArray(const char* name, int* iv, unsigned int arraySize)
+{
+        GLuint location = glGetUniformLocation(shaderProgram, name);
+        glUniform1iv(location, arraySize, iv);
 }
 
