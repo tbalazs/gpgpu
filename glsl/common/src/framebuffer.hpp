@@ -34,6 +34,10 @@ public:
   int getHeight(){
     return height;
   }
+
+  GLuint getHandle(){
+    return handle;
+  }
 };
 
 #endif
