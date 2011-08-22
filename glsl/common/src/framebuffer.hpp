@@ -41,6 +41,10 @@ public:
   int getLevels(){
 	  return numMips;
   }
+
+  GLuint getHandle(){
+        return handle;
+  }
 };
 
 #endif
