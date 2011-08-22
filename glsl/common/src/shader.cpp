@@ -68,7 +68,7 @@ std::string Shader::getShaderInfoLog(GLuint& object){
   if(logLength > 0){
     tmpLog = new char[logLength];
     glGetShaderInfoLog(object, logLength, &charsWritten, tmpLog);
-	log = tmpLog;
+    log = tmpLog;
     delete[] tmpLog;
   }
 
@@ -111,12 +111,17 @@ void Shader::enable(){
 }
 
 void Shader::disable(){
-  glUseProgram(0);
+  glUseProgram(NULL);
 }
 
 void Shader::bindUniformInt(const char* name, int i){
   GLuint vectorLocation = glGetUniformLocation(shaderProgram, name);
   glUniform1i(vectorLocation, i);
+}
+
+void Shader::bindUniformInt2(const char* name, int i1, int i2){
+  GLuint vectorLocation = glGetUniformLocation(shaderProgram, name);
+  glUniform2i(vectorLocation, i1, i2);
 }
 
 void Shader::bindUniformFloat(const char* name, float f){

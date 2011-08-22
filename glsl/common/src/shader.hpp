@@ -30,6 +30,7 @@ public:
   }
 
   void bindUniformInt(const char* name, int i);
+  void bindUniformInt2(const char* name, int i1, int i2);
   void bindUniformFloat(const char* name, float f);
   void bindUniformFloat2(const char* name, float f1, float f2);
   void bindUniformFloat3(const char* name, float f1, float f2, float f3);

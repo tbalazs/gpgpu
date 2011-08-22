@@ -25,6 +25,8 @@ public:
     return colorBuffer[plane];
   }
 
+  void clear();
+
   int getWidth(){
     return width;
   }
