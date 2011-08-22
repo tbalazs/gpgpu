@@ -8,7 +8,7 @@ LIBS = -lGL -lglut -lGLEW -lIL -lILU
 COMMON_OBJECTS = framebuffer.o pointgrid.o quad.o shader.o texture.o
 LAB_OBJECTS = main.o
 
-lab3: ${COMMON_OBJECTS} ${LAB_OBJECTS}
+lab4: ${COMMON_OBJECTS} ${LAB_OBJECTS}
 	${CXX} ${CXXFLAGS} ${LIBS} -o lab4 ${COMMON_OBJECTS} ${LAB_OBJECTS}
 
 main.o: main.cpp
