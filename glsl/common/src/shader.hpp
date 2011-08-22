@@ -35,6 +35,12 @@ public:
   void bindUniformFloat2(const char* name, float f1, float f2);
   void bindUniformFloat3(const char* name, float f1, float f2, float f3);
   void bindUniformTexture(const char* name, GLuint texture, GLuint unit);
+  
+  void bindUniformMatrix(const char* name, float* m, unsigned int arraySize = 1);
+  void bindUniformVector(const char* name, float* m, unsigned int arraySize = 1);
+  void bindUniformFloat4Array(const char* name, float* m, unsigned int arraySize = 1);
+
+  void bindUniformIntArray(const char* name, int* iv, unsigned int arraySize);
 
   void bindAttribLocation(GLuint id, const char* name);
 };
