@@ -6,12 +6,14 @@
 Shader::Shader(){
 }
 
-Shader::Shader(const char* vertexShaderPath, const char* fragmentShaderPath){
-  GLuint vertexProgram, fragmentProgram;
+Shader::Shader(const char* vertexShaderPath, const char* fragmentShaderPath, const char* geometryShaderPath){
+  geometryProgram = 0;
 
   shaderFromFile(vertexShaderPath, GL_VERTEX_SHADER, vertexProgram);
   shaderFromFile(fragmentShaderPath, GL_FRAGMENT_SHADER, fragmentProgram);
-  linkShaders(vertexProgram, fragmentProgram, shaderProgram);
+  if(geometryShaderPath)
+	  shaderFromFile(geometryShaderPath, GL_GEOMETRY_SHADER, geometryProgram);
+  linkShaders(vertexProgram, fragmentProgram, geometryProgram, shaderProgram);
   glDeleteShader(vertexProgram);
   glDeleteShader(fragmentProgram);
 }
@@ -43,12 +45,25 @@ void Shader::shaderFromFile(const char* shaderPath, GLenum shaderType, GLuint& h
   }
 }
 
-void Shader::linkShaders(GLuint& vertexShader, GLuint& fragmentShader, GLuint& handle){
+void Shader::linkShaders(GLuint& vertexShader, GLuint& fragmentShader, GLuint& geometryShader, GLuint& handle){
   int errorFlag = -1;
 
   handle = glCreateProgram();
   glAttachShader(handle, vertexShader);
   glAttachShader(handle, fragmentShader);
+  if(geometryShader != 0)
+  {
+	  glAttachShader(handle, geometryShader);
+	  glProgramParameteri(handle, GL_GEOMETRY_VERTICES_OUT_EXT, 4);
+	  glProgramParameteri(handle, GL_GEOMETRY_INPUT_TYPE_EXT, GL_POINTS);
+	  glProgramParameteri(handle, GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_POINTS);
+
+	  const char* varname = "celldata";
+	  glTransformFeedbackVaryings(handle, 1, &varname, GL_SEPARATE_ATTRIBS_EXT);
+  }
+
+
+
   glLinkProgram(handle);
   glGetProgramiv(handle, GL_LINK_STATUS, &errorFlag);
   if(!errorFlag){
@@ -151,23 +166,3 @@ void Shader::bindAttribLocation(GLuint id, const char* name){
   glBindAttribLocation(shaderProgram, id, name);
 }
 
-void Shader::bindUniformMatrix(const char* name, float* m, unsigned int arraySize){
-  GLuint location = glGetUniformLocation(shaderProgram, name);
-  glUniformMatrix4fv(location, arraySize, false, m);
-}
-
-void Shader::bindUniformVector(const char* name, float* m, unsigned int arraySize){
-  GLuint location = glGetUniformLocation(shaderProgram, name);
-  glUniform3fv(location, arraySize, m);
-}
-
-void Shader::bindUniformFloat4Array(const char* name, float* m, unsigned int arraySize){
-  GLuint location = glGetUniformLocation(shaderProgram, name);
-  glUniform4fv(location, arraySize, m);
-}
-
-void Shader::bindUniformIntArray(const char* name, int* iv, unsigned int arraySize)
-{
-	GLuint location = glGetUniformLocation(shaderProgram, name);
-	glUniform1iv(location, arraySize, iv);
-}

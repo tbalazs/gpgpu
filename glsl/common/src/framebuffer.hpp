@@ -14,11 +14,14 @@ private:
 
   GLenum* buffers;
 
+  bool hasMipMaps;
+  int numMips;
+
 public:
-  Framebuffer(GLuint width, GLuint height, GLuint planes);
+  Framebuffer(GLuint width, GLuint height, GLuint planes, bool genMipMaps = false, bool floatingpoint = true);
   ~Framebuffer();
 
-  void setRenderTarget();
+  void setRenderTarget(int mipLevel = -1);
   void disableRenderTarget();
 
   GLuint getColorBuffer(unsigned int plane){
@@ -35,8 +38,8 @@ public:
     return height;
   }
 
-  GLuint getHandle(){
-    return handle;
+  int getLevels(){
+	  return numMips;
   }
 };
 
