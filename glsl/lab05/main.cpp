@@ -64,6 +64,7 @@ void init(){
 			std::cout << "GLSL: " << glGetString (GL_SHADING_LANGUAGE_VERSION)<< std::endl;
 		}
 	}
+	glGetError();
 
 	fullscreenQuad = new Quad();
 	simpleShader = new Shader("shaders/raydir.vert", "shaders/raytrace.frag");
