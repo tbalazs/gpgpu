@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <GL/glu.h>
 
 #include <iostream>
 
@@ -19,40 +20,40 @@ Texture2D* texture;
 Shader* simpleShader;
 
 Shader* gaussShader;
-/*void gauss()
-  {
+void gaussSingle()
+{
   gaussShader->enable();
   gaussShader->bindUniformTexture("colorMap",texture->getTextureHandle(),0);
   fullscreenQuad->render(gaussShader);
   gaussShader->disable();
-  }*/
+}
 
 Framebuffer* computeBuffer[2];
 int inputBuffer = 0;
 int npasses = 15;
 
-/*
-  void gauss()
-  {
+
+void gaussMultipass()
+{
   for(int i = 0; i < npasses; i++)
-  {
-  if(i!=npasses -1)
-  computeBuffer[(inputBuffer + 1) % 2]->setRenderTarget();
-  gaussShader->enable();
-  gaussShader->bindUniformTexture("colorMap",
-  i == 0 ? texture->getTextureHandle() : computeBuffer[inputBuffer]->getColorBuffer(0),
-  0);
-  fullscreenQuad->render(gaussShader);
-  gaussShader->disable();
-  if(i!=npasses -1)
-  computeBuffer[(inputBuffer + 1) % 2]->disableRenderTarget();
-  inputBuffer = (inputBuffer + 1) % 2;
-  }
-  }*/
+    {
+      if(i != npasses - 1)
+	computeBuffer[(inputBuffer + 1) % 2]->setRenderTarget();
+      gaussShader->enable();
+      gaussShader->bindUniformTexture("colorMap",
+				      i == 0 ? texture->getTextureHandle() : computeBuffer[inputBuffer]->getColorBuffer(0),
+				      0);
+      fullscreenQuad->render(gaussShader);
+      gaussShader->disable();
+      if(i != npasses - 1)
+	computeBuffer[(inputBuffer + 1) % 2]->disableRenderTarget();
+      inputBuffer = (inputBuffer + 1) % 2;
+    }
+}
 
 Shader* gaussShaderV;
 Shader* gaussShaderH;
-void gauss()
+void gaussSeparableMultipass()
 {
   for(int i = 0; i < npasses; i++)
     {
@@ -99,31 +100,7 @@ void waveEquation()
   fullscreenQuad->render(WE_visualize);
   WE_visualize->disable();
 }
-/*
-  void waveEquation()
-  {
-  WE_computeBuffer[1]->setRenderTarget();
-  WE_iteration->enable();
-  WE_iteration->bindUniformTexture("inputMap", WE_computeBuffer[0]->getColorBuffer(0), 0);
-  WE_iteration->bindUniformInt("pass", 0);
-  fullscreenQuad->render(WE_iteration);
-  WE_iteration->disable();
-  WE_computeBuffer[1]->disableRenderTarget();
 
-  WE_computeBuffer[0]->setRenderTarget();
-  WE_iteration->enable();
-  WE_iteration->bindUniformTexture("inputMap", WE_computeBuffer[1]->getColorBuffer(0), 0);
-  WE_iteration->bindUniformInt("pass", 1);
-  fullscreenQuad->render(WE_iteration);
-  WE_iteration->disable();
-  WE_computeBuffer[0]->disableRenderTarget();
-
-  WE_visualize->enable();
-  WE_visualize->bindUniformTexture("inputMap", WE_computeBuffer[0]->getColorBuffer(0), 0);
-  fullscreenQuad->render(WE_visualize);
-  WE_visualize->disable();
-  }
-*/
 void resetWave()
 {
   WE_computeBuffer[0]->clear();
@@ -132,23 +109,16 @@ void resetWave()
 
 void addForce(int x, int y){
   WE_computeBuffer[inputBuffer]->setRenderTarget();
-  //WE_computeBuffer[0]->setRenderTarget();
   WE_addForce->enable();
   WE_addForce->bindUniformInt2("center", x, 600 - y);
   fullscreenQuad->render(WE_addForce);
   WE_addForce->disable();
   WE_computeBuffer[inputBuffer]->disableRenderTarget();
-  //WE_computeBuffer[0]->disableRenderTarget();
 }
-
-
-
 
 int example = 1;
 
-
 void init(){
-
   glewExperimental = GL_TRUE;
   GLenum err = glewInit();
   if (GLEW_OK != err)	{
@@ -165,8 +135,11 @@ void init(){
       }
   }
 
-  if(glGetError() != GL_NO_ERROR){
-    std::cout << "Framebuffer: Error creating color attachment0" << std::endl;
+  // FIXME: GLEW Init causes "Invalid enumerant" OpenGL error!
+  //        Supressing it now as the pipeline seems working.
+  GLenum error = glGetError();
+  if(GL_NO_ERROR != error){
+    // std::cout << "Error: " << gluErrorString(error) << std::endl;
   }
 
   fullscreenQuad = new Quad();
@@ -180,6 +153,11 @@ void init(){
 
   texture = new Texture2D();
   texture->loadFromFile(std::string("../common/images/lena.jpg"));
+
+  if(1 == example){
+    glutReshapeWindow(texture->getWidth(),
+		      texture->getHeight());
+  }
 
   computeBuffer[0] = new Framebuffer(texture->getWidth(), texture->getHeight(), 1);
   computeBuffer[1] = new Framebuffer(texture->getWidth(), texture->getHeight(), 1);
@@ -200,9 +178,22 @@ void display(){
     case 1:
       glutReshapeWindow(texture->getWidth(),
 			texture->getHeight());
-      gauss();
+      gaussSingle();
       break;
+
     case 2:
+      glutReshapeWindow(texture->getWidth(),
+			texture->getHeight());
+      gaussMultipass();
+      break;
+
+    case 3:
+      glutReshapeWindow(texture->getWidth(),
+			texture->getHeight());
+      gaussSeparableMultipass();
+      break;
+
+    case 4:
       glutReshapeWindow(600,600);
       waveEquation();
       break;
@@ -236,6 +227,21 @@ void keyboard(unsigned char key, int x, int y){
     example = 2;
     break;
 
+  case '3':
+    example = 3;
+    break;
+
+  case '4':
+    example = 4;
+    break;
+
+  case '+':
+    npasses += 1;
+    break;
+  case '-':
+    npasses = MAX(npasses - 1, 1);
+    break;
+
   case ' ':
     resetWave();
     break;
@@ -256,7 +262,8 @@ void reshape(int width, int height){
 int main(int argc, char* argv[]){
   glutInit(&argc, argv);
   glutInitContextVersion (3, 3);
-  glutInitContextFlags (GLUT_CORE_PROFILE | GLUT_DEBUG);
+  glutInitContextFlags (GLUT_FORWARD_COMPATIBLE);
+  glutInitContextProfile(GLUT_CORE_PROFILE);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
   glutInitWindowSize(windowWidth, windowHeight);
   glutCreateWindow("GPGPU 3. labor: glsl");
