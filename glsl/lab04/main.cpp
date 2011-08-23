@@ -47,13 +47,13 @@ void histogram(){
   glReadPixels(0, 0, 255, 1, GL_RED, GL_FLOAT, histogram);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  std::cout << "Histogram:\n----------" << std::endl;
+  // std::cout << "Histogram:\n----------" << std::endl;
   int maxValue = 0;
   for(int i = 0; i < 255; ++i){
     maxValue = maxValue > histogram[i] ? maxValue : histogram[i];
-    std::cout << i << " : " << histogram[i] << std::endl;
+    // std::cout << i << " : " << histogram[i] << std::endl;
   }
-  std::cout << "-----------------\nMaximum: " << maxValue << std::endl;
+  // std::cout << "-----------------\nMaximum: " << maxValue << std::endl;
 
   glViewport(0, 0, windowWidth, windowHeight);
   simpleShader->enable();
@@ -399,9 +399,6 @@ void init(){
   texture = new Texture2D();
   texture->loadFromFile(std::string("../common/images/lena.jpg"));
 
-  windowWidth = texture->getWidth();
-  windowHeight = texture->getHeight();
-
   grid = new PointGrid(texture->getWidth(), texture->getHeight());
 
   histogramBuffer = new Framebuffer(255, 1, 1);
@@ -412,7 +409,7 @@ void init(){
   hdrTexture = new Texture2D();
   hdrTexture->loadFromFile(std::string("../common/images/free_005.hdr"));
 
-  glutReshapeWindow(windowWidth, windowHeight);
+  glutReshapeWindow(texture->getWidth(), texture->getHeight());
 }
 
 void display(){
@@ -522,7 +519,7 @@ void reshape(int width, int height){
 }
 
 void idle(){
-  //  glutPostRedisplay();
+
 }
 
 int main(int argc, char* argv[]){

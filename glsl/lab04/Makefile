@@ -16,6 +16,7 @@ main.o: main.cpp
 
 clean:
 	rm -f *.o
+	rm -f *.txt
 	rm -f lab4
 
 include ../common/src/common.mk
