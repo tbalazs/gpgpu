@@ -1,14 +1,34 @@
+/*
+ *
+ * Copyright © 2010-2011 Balázs Tóth <tbalazs@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ */
+
 #include "framebuffer.hpp"
 
 #include <string>
 #include <iostream>
 #include <cmath>
 
-// Calculates log2 of number.  
-float Log2( float n )  
-{  
-    // log(n)/log(2) is log2.  
-    return log( n ) / log( 2.0f );  
+// Calculates log2 of number.
+float Log2( float n )
+{
+    // log(n)/log(2) is log2.
+    return log( n ) / log( 2.0f );
 }
 
 Framebuffer::Framebuffer(GLuint width, GLuint height, GLuint planes, bool genMipMaps, bool floatingpoint){
@@ -23,7 +43,7 @@ Framebuffer::Framebuffer(GLuint width, GLuint height, GLuint planes, bool genMip
 	float fnumMips = Log2((float)width);
 	if(fmod(fnumMips, 1.0f) != 0)
 		hasMipMaps = false;
-	else 
+	else
 		numMips = fnumMips + 1;
   }
 
@@ -47,7 +67,7 @@ Framebuffer::Framebuffer(GLuint width, GLuint height, GLuint planes, bool genMip
 	else
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);	
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -113,7 +133,7 @@ Framebuffer::~Framebuffer(){
 void Framebuffer::setRenderTarget(int mipLevel)
 {
   glBindFramebuffer(GL_FRAMEBUFFER, handle);
-  
+
   if(mipLevel >= 0 && hasMipMaps)
   {
 	  for(int i = 0; i < planes; i++)
@@ -125,8 +145,8 @@ void Framebuffer::setRenderTarget(int mipLevel)
   }
   else
 	  glViewport(0,0, width, height);
-  
-  glDrawBuffers(planes, buffers);  
+
+  glDrawBuffers(planes, buffers);
 }
 
 void Framebuffer::disableRenderTarget(){
