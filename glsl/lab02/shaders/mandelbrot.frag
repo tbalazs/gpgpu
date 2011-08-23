@@ -1,8 +1,9 @@
 #version 130
 
-const vec2 center = vec2(-1.2,-1.2);
-const float zoom = 2.35;
-const float iteration = 100;
+uniform vec2 center;
+uniform float zoom;
+uniform float iteration;
+uniform bool fractalType;
 uniform vec2 k;
 
 in vec2 fTexCoord;
@@ -17,11 +18,15 @@ void main(){
 
   int i;
   z = c;
-  for(i=0; i<iteration; i++) {   
-    z = vec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y) + c;
-    if (dot(z, z) > 4)break;
+  for(i=0; i<iteration; i++) {
+    if(fractalType){
+      z = vec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y) + c;
+    } else {
+      z = vec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y) + k;
+    }
+    if (dot(z, z) > 4.0) break;
   }
 
-  outColor = vec4(1.0 - i/iteration);
+  outColor = vec4(vec3(1.0 - (i/iteration)), 1.0);
 }
 

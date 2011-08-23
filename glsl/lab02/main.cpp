@@ -22,6 +22,11 @@ int example = 1;
 
 // Mandelbrot set
 Shader* shaderMandelbrot;
+bool fractalType = true;
+float centerX = -1.68f;
+float centerY = -1.23f;
+float zoom = 2.35f;
+float iteration = 100.0f;
 float kReal = 0.353f;
 float kIm = 0.288f;
 
@@ -29,6 +34,10 @@ void mandelbrot()
 {
   shaderMandelbrot->enable();
   shaderMandelbrot->bindUniformFloat2("k", kReal, kIm);
+  shaderMandelbrot->bindUniformFloat2("center", centerX, centerY);
+  shaderMandelbrot->bindUniformFloat("zoom", zoom);
+  shaderMandelbrot->bindUniformFloat("iteration", iteration);
+  shaderMandelbrot->bindUniformBool("fractalType", fractalType);
   fullscreenQuad->render(shaderMandelbrot);
   shaderMandelbrot->disable();
 }
@@ -149,17 +158,48 @@ void keyboard(unsigned char key, int x, int y)
       example = 4;
       break;
 
-    case 'W':
+    case 'w':
       kReal += 0.01f;
       break;
-    case 'S':
+    case 's':
       kReal -= 0.01f;
       break;
-    case 'A':
+    case 'a':
       kIm -= 0.01f;
       break;
-    case 'D':
+    case 'd':
       kIm += 0.01f;
+      break;
+
+    case 'W':
+      centerY += 0.01f;
+      break;
+    case 'S':
+      centerY -= 0.01f;
+      break;
+    case 'A':
+      centerX -= 0.01f;
+      break;
+    case 'D':
+      centerX += 0.01f;
+      break;
+
+    case 'q':
+      iteration++;
+      break;
+    case 'Q':
+      iteration = MAX(1, iteration - 1);
+      break;
+
+    case 'e':
+      zoom += 0.01f;
+      break;
+    case 'E':
+      zoom -= 0.01f;
+      break;
+
+    case 't':
+      fractalType = !fractalType;
       break;
 
     default:
