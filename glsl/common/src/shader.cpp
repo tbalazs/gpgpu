@@ -129,6 +129,11 @@ void Shader::disable(){
   glUseProgram(0);
 }
 
+void Shader::bindUniformBool(const char* name, bool b){
+    GLuint boolLocation = glGetUniformLocation(shaderProgram, name);
+    glUniform1f(boolLocation, b);
+}
+
 void Shader::bindUniformInt(const char* name, int i){
   GLuint vectorLocation = glGetUniformLocation(shaderProgram, name);
   glUniform1i(vectorLocation, i);

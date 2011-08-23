@@ -35,6 +35,7 @@ public:
     return shaderProgram;
   }
 
+  void bindUniformBool(const char* name, bool b);
   void bindUniformInt(const char* name, int i);
   void bindUniformInt2(const char* name, int i1, int i2);
   void bindUniformFloat(const char* name, float f);
