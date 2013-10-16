@@ -76,7 +76,7 @@ void ClWrapper::createContext()
 
 void ClWrapper::createCommandQueue()
 {
-  _cqueue = clCreateCommandQueue(_context, _device_id, 0, NULL);
+  _cqueue = clCreateCommandQueue(_context, _device_id, CL_QUEUE_PROFILING_ENABLE, NULL);
   if(!_cqueue)
     {
       std::cerr << "Command queue creation failed!" << std::endl;
@@ -145,4 +145,3 @@ cl_kernel ClWrapper::createKernel(cl_program program, const char* kernelName){
   }
   return kernel;
 }
-
