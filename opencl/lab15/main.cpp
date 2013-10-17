@@ -350,6 +350,95 @@ void exclusive_scan()
     std::cout << std::endl;
 }
 
+// Compact primitive
+void compact()
+{
+    std::cout << "Global compact" << std::endl;
+
+    const size_t dataSize = 1024;
+    cl_int err = CL_SUCCESS;
+
+    cl_kernel predicateKernel = cl.createKernel(clProgram, "compact_predicate");
+    cl_kernel exscanKernel = cl.createKernel(clProgram, "compact_exscan");
+    cl_kernel compactKernel = cl.createKernel(clProgram, "compact_compact");
+
+    int* hData = new int[dataSize];
+    for(size_t i = 0; i < dataSize; ++i)
+    {
+        hData[i] = rand() % 100;
+    }
+    int* oData = new int[dataSize];
+    memcpy(oData, hData, sizeof(int)*dataSize);
+
+    cl_mem gData = clCreateBuffer(cl.context(), CL_MEM_READ_WRITE, sizeof(float) * dataSize, NULL, NULL);
+    clEnqueueWriteBuffer(cl.cqueue(), gData, CL_TRUE, 0, sizeof(float) * dataSize, hData, 0, NULL, NULL);
+    cl_mem gPred = clCreateBuffer(cl.context(), CL_MEM_READ_WRITE, sizeof(int) * dataSize, NULL, NULL);
+    cl_mem gPrefSum = clCreateBuffer(cl.context(), CL_MEM_READ_WRITE, sizeof(int) * dataSize, NULL, NULL);
+
+    clSetKernelArg(predicateKernel, 0, sizeof(cl_mem), &gData);
+    clSetKernelArg(predicateKernel, 1, sizeof(cl_mem), &gPred);
+
+    size_t workSize = dataSize;
+    cl_event kernelEvent;
+    clEnqueueNDRangeKernel(cl.cqueue(), predicateKernel,
+                           1, NULL, &workSize, NULL,
+                           0, NULL, &kernelEvent);
+
+    printTimeStats(kernelEvent);
+
+    clSetKernelArg(exscanKernel, 0, sizeof(cl_mem), &gPred);
+    clSetKernelArg(exscanKernel, 1, sizeof(cl_mem), &gPrefSum);
+
+    clEnqueueNDRangeKernel(cl.cqueue(), exscanKernel,
+                           1, NULL, &workSize, NULL,
+                           0, NULL, &kernelEvent);
+
+    printTimeStats(kernelEvent);
+
+    clSetKernelArg(compactKernel, 0, sizeof(cl_mem), &gData);
+    clSetKernelArg(compactKernel, 1, sizeof(cl_mem), &gPred);
+    clSetKernelArg(compactKernel, 2, sizeof(cl_mem), &gPrefSum);
+
+    clEnqueueNDRangeKernel(cl.cqueue(), compactKernel,
+                           1, NULL, &workSize, NULL,
+                           0, NULL, &kernelEvent);
+
+    printTimeStats(kernelEvent);
+
+    clEnqueueReadBuffer(cl.cqueue(), gData, CL_TRUE, 0, sizeof(float) * dataSize, hData, 0, NULL, NULL);
+
+    // reference
+    int pos = 0;
+    for(size_t i = 0; i < dataSize; ++i)
+    {
+        if(oData[i] < 50)
+        {
+            oData[pos] = oData[i];
+            pos++;
+        }
+    }
+
+    for(size_t i = 0; i < pos; ++i)
+    {
+        if(oData[i] != hData[i])
+        {
+            std::cerr << "Wrong value at " << i << ". Value is " << hData[i] << " but expected " << oData[i] << "." << std::endl;
+            break;
+        }
+    }
+
+    delete[] oData;
+    delete[] hData;
+    clReleaseMemObject(gPrefSum);
+    clReleaseMemObject(gPred);
+    clReleaseMemObject(gData);
+    clReleaseKernel(compactKernel);
+    clReleaseKernel(exscanKernel);
+    clReleaseKernel(predicateKernel);
+
+    std::cout << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
     clProgram = cl.createProgram("kernels/programs.cl");
@@ -358,5 +447,6 @@ int main(int argc, char* argv[])
     histogram_local();
     reduce_global();
     exclusive_scan();
+    compact();
     return(0);
 }

@@ -72,3 +72,45 @@ void exscan_global(__global int* data)
                 data[0] = 0;
         }
 }
+
+__kernel
+void compact_predicate(__global int* data, __global int* pred)
+{
+        int id = get_global_id(0);
+        int predVal = data[id] < 50 ? 1 : 0;
+        pred[id] = predVal;
+}
+
+__kernel
+void compact_exscan(__global int* pred, __global int* prefSum)
+{
+        int id = get_global_id(0);
+        prefSum[id] = (id > 0) ? pred[id-1] : 0;
+        barrier(CLK_GLOBAL_MEM_FENCE);
+
+        for(int s = 1; s < get_global_size(0); s *= 2)
+        {
+                int tmp = prefSum[id];
+                if(id + s < get_global_size(0))
+                {
+                        prefSum[id + s] += tmp;
+                }
+                barrier(CLK_GLOBAL_MEM_FENCE);
+        }
+        if(id == 0)
+        {
+                prefSum[0] = 0;
+        }
+}
+
+__kernel
+void compact_compact(__global int* data, __global int* pred, __global int* prefSum)
+{
+        int id = get_global_id(0);
+        int val = data[id];
+        barrier(CLK_GLOBAL_MEM_FENCE);
+        if(pred[id] == 1)
+        {
+                data[prefSum[id]]=val;
+        }
+}
